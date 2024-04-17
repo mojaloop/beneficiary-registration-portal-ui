@@ -16,17 +16,14 @@ COPY . .
 # Build the React app
 RUN npm run build
 
-# Use Node.js as the base image for the runtime
-FROM node:lts-alpine
-
-# Set the working directory
-WORKDIR /app
+# Use a smaller base image for the runtime
+FROM nginx:alpine
 
 # Copy the built React app from the previous stage
-COPY --from=build /app/build .
+COPY --from=build /app/build /usr/share/nginx/html
 
 # Expose the port your React app is running on
-EXPOSE 3007
+EXPOSE 80
 
-# Start the React app
-CMD ["npm", "start"]
+# Start the Nginx server
+CMD ["nginx", "-g", "daemon off;"]
