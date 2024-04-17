@@ -299,7 +299,7 @@ const TokenRegistrationPage: React.FC = () => {
    */
   const handleGetParties = async () => {
     try {
-      const apiUrl = `http://localhost:3001/parties/${selectedPaymentType}/${payeeId}`;
+      const apiUrl = `https://test-mosippayee.devpm4ml.labspm4ml1002.mojaloop.live/mlcon-outbound/parties/${selectedPaymentType}/${payeeId}`;
       const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error('Failed to fetch data');

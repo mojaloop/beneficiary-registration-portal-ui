@@ -18,7 +18,7 @@ export const GetUserInfo = async (
   redirect_uri: string
 ): Promise<string | null> => {
 
-  const apiUrl = 'http://192.168.1.55:3000/tokens'; // eSignet API endpoint
+  const apiUrl = `${mojaloopUrl}/tokens`;; // eSignet API endpoint
   const requestBody = {
     clientId: clientId,
     code: code,
@@ -63,15 +63,15 @@ export const registerToken = async (
   idToken: string
 ): Promise<string | null> => {
 
-  const token = await generateRandomToken(idToken);
+  //const token = await generateRandomToken(idToken);
 
-  console.log('Generated token:', token);
+ // console.log('Generated token:', token);
 
   const apiUrl = `${mojaloopUrl}/tokens`; // MojaLoop API endpoint
   const requestBody = {
     payeeId: payeeId,
     payeeIdType: idType,
-    paymentToken: token
+    paymentToken: idToken
   }; // Request body to be sent to MojaLoop
 
   try {
@@ -88,7 +88,7 @@ export const registerToken = async (
       });
     //alert('The token has been registered'); // Uncomment this if needed
     
-    return token;
+    return idToken;
 
   } catch (error) {
     console.error('Error registering token:', error); // Log error
