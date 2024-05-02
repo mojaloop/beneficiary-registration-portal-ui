@@ -23,7 +23,7 @@ FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Expose the port your React app is running on
-EXPOSE 80
+EXPOSE 3007
 
 # Start the Nginx server
 CMD ["nginx", "-g", "daemon off;"]

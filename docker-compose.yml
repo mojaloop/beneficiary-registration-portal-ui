@@ -1,0 +1,25 @@
+version: '3'
+services:
+  node-app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3007:3007"
+    volumes:
+      - ./backend:/app
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+
+  react-app:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3006:3006"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NODE_ENV=development
+    command: npm start
