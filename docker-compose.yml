@@ -1,25 +1,26 @@
-version: '3'
+version: '3.8'
 services:
-  node-app:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+  backend:
+    build: ./backend
     ports:
       - "3007:3007"
-    volumes:
-      - ./backend:/app
     environment:
       - NODE_ENV=development
-    command: npm run dev
+    depends_on:
+      - db
 
-  react-app:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+  frontend:
+    build: ./frontend
     ports:
       - "3006:3006"
-    volumes:
-      - ./frontend:/app
+
+  db:
+    image: mysql:5.7
     environment:
-      - NODE_ENV=development
-    command: npm start
+      MYSQL_ROOT_PASSWORD: 
+      MYSQL_DATABASE: brp
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:

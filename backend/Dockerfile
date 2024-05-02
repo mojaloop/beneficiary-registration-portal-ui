@@ -1,5 +1,5 @@
 #Use Node.js LTS version as the base image
-FROM node:16.15.0-alpine as build
+FROM node:18.17.0-alpine as build
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -19,8 +19,6 @@ RUN npm run build
 # Use a smaller base image for the runtime
 FROM nginx:alpine
 
-# Copy the built React app from the previous stage
-COPY --from=build /app/build /usr/share/nginx/html
 
 # Expose the port your React app is running on
 EXPOSE 3007
