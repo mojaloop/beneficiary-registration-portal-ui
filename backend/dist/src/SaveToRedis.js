@@ -1,19 +1,7 @@
+"use strict";
 //import redis from 'ioredis';
-
-export interface KYCInformation {
-  sub: string;
-  birthdate: string;
-  address: {
-    locality: string;
-  };
-  gender: string;
-
-  name: string;
-  phone_number: string;
-  email: string;
-  picture: string;
-}
-/* 
+Object.defineProperty(exports, "__esModule", { value: true });
+/*
 export const saveDataToRedis = async (key: string, data: any) => {
   const client = redis.createClient();
 
@@ -63,4 +51,4 @@ export const getKYCInfoFromRedis = async (sub: string) => {
     console.error('Error retrieving KYC information from Redis:', error);
     throw error;
   }
-}; */
+}; */ 

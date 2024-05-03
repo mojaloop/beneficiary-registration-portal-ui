@@ -1,26 +1,36 @@
 version: '3.8'
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
-      - "3007:3007"
-    environment:
-      - NODE_ENV=development
+      - "8080:8080"
     depends_on:
-      - db
+      - mysql
+    networks:
+      - my_network
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "3006:3006"
+      - "3007:3007"
+    networks:
+      - my_network
 
-  db:
-    image: mysql:5.7
+  mysql:
+    image: mysql:latest
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 
+      MYSQL_ROOT_PASSWORD: examplepassword
       MYSQL_DATABASE: brp
-    volumes:
-      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - my_network
 
-volumes:
-  mysql-data:
+networks:
+  my_network:
+    driver: bridge

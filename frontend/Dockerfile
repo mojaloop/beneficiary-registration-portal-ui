@@ -1,5 +1,5 @@
-#Use Node.js LTS version as the base image
-FROM node:18.17.0-alpine as build
+# Use the official Node.js LTS version as the base image
+FROM node:18.17.0-alpine AS build
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -22,8 +22,11 @@ FROM nginx:alpine
 # Copy the built React app from the previous stage
 COPY --from=build /app/build /usr/share/nginx/html
 
+# Copy the custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose the port your React app is running on
-EXPOSE 3006
+EXPOSE 3007
 
 # Start the Nginx server
 CMD ["nginx", "-g", "daemon off;"]
