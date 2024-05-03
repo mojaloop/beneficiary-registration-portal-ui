@@ -39,7 +39,7 @@ const TokenRegistrationPage: React.FC = () => {
 
   if (!response.ok || response.status === 400 || response.status === 500) {
     setLoading(false);
-    throw new Error(` due to ${response.status} ${response.statusText}`);
+    console.error(` due to ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();
