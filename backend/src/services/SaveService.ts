@@ -1,17 +1,27 @@
 import mysql from 'mysql';
+import { TokenData } from '../models/TokenData';
 
+const {
+  HOST,
+  USER,
+  PASSWORD,
+  DATABASE,
+} = process.env;
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'brp'
+  host: HOST,
+  user: USER,
+  password: PASSWORD,
+  database: DATABASE
 });
 
-interface TokenData {
-  psut: string;
-  token: string;
-}
+db.connect((err) => {
+  if (err) {
+    console.error('Error connecting to database:', err);
+    return;
+  }
+  console.log('Connected to database successfully');
+});
 
 export const SaveDataToDB = async (tokenData: TokenData): Promise<TokenData | { error: string }> => {
   return new Promise((resolve, reject) => {

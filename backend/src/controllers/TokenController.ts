@@ -1,6 +1,7 @@
 import { json } from 'stream/consumers';
-import { KYCData, ResponseData, KYCInformation } from './models';
 import { error } from 'console';
+import { KYCInformation } from '../models/KYCInformation';
+import { KYCData } from '../models/KYCData';
 
 const mojaloopUrl = "http://192.168.1.55"
 //get user info from esignet
