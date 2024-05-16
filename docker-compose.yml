@@ -11,15 +11,6 @@ services:
     networks:
       - my_network
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3007:3007"
-    networks:
-      - my_network
-
   mysql:
     image: mysql:latest
     restart: always
