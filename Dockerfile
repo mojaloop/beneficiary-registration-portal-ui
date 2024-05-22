@@ -1,7 +1,7 @@
 FROM node:lts-alpine as builder
+
 # Set the working directory inside the container
 WORKDIR /app
-
 COPY package*.json tsconfig.json ./
 
 # Install dependencies
@@ -14,6 +14,8 @@ COPY ./src ./src
 RUN npm run build
 
 FROM node:lts-alpine
+
+RUN adduser -D ml-user
 WORKDIR /app
 
 COPY package*.json ./
@@ -24,5 +26,6 @@ COPY --from=builder /app/dist/ ./dist/
 
 # Set the NODE_ENV environment variable
 ENV NODE_ENV=production
+USER ml-user
 
 CMD ["node", "dist/index.js"]
