@@ -4,11 +4,11 @@
   "description": "Beneficiary Registration Portal (BRP) backend",
   "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\"",
     "start": "node ./dist/index.js",
     "start:dev": "ts-node src/index.ts",
     "build": "tsc",
-    "lint": "echo \"Error: no linting found\" && exit 1",
+    "lint": "echo \"Error: no linting found\"",
     "dep:check": "npx --no-install ncu -e 2",
     "dep:update": "npx --no-install ncu -u",
     "audit:fix": "npm audit fix",

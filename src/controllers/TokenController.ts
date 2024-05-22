@@ -3,12 +3,12 @@ import { error } from 'console';
 import { KYCInformation } from '../models/KYCInformation';
 import { KYCData } from '../models/KYCData';
 
-const mojaloopUrl = "http://192.168.1.55"
+const mojaloopUrl = "http://192.168.1.55" // todo: remove this hardcoded value
 //get user info from esignet
 
 /**
  * Fetches user information from eSignet
- * 
+ *
  * @param {string} code The code obtained from eSignet
  * @param {string} clientId The client ID of the app
  * @param {string} grant_type The grant type to be used
@@ -92,7 +92,7 @@ throw error('PAYMENT_ADAPTER_URL not defined');
         body: JSON.stringify(requestBody)
       });
     //alert('The token has been registered'); // Uncomment this if needed
-    
+
     return token;
 
   } catch (error) {
@@ -181,7 +181,7 @@ throw error('MOJALOOP_GETPARTIES_URL not defined');
  * @returns {string} The generated random token
  */
 const generateRandomToken = async (idToken: string): Promise<string> => {
- 
+
   // The characters to use for generating the random token
   const characters = idToken;
   // The length of the random token to generate
@@ -219,23 +219,23 @@ export const getUserToken = async (
   if (!url) {
     throw new Error('JWT private key is not defined in the environment variables');
   }
-   
+
   try {
-    
+
 
     const headers = {
       'Content-Type': 'application/x-www-form-urlencoded'
     };
-    
+
     const body = new URLSearchParams({
       'grant_type': 'authorization_code',
       'code': code, // Replace with your actual code
       'client_id': client_id, // Replace with your actual client_id
       'client_assertion_type': 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer', // Replace with your actual client_assertion_type
       'client_assertion': client_assertion, // Replace with your actual client_assertion
-      'redirect_uri': "http://localhost:3007"
+      'redirect_uri': "http://localhost:3007" // todo: remove this hardcoded value
     });
-    
+
     const response = await fetch(url, {
       method: 'POST',
       headers,
@@ -244,7 +244,7 @@ export const getUserToken = async (
 
     if (!response.ok) {
       const error = await response.json();
-    
+
 
       return { error: `Failed to fetch user token: ${error.error_description || response.statusText}` };
     }
@@ -267,7 +267,7 @@ export const getUserToken = async (
 export const fetchUserData = async (token: string): Promise<any> => {
   // URL for fetching user data
   const url = process.env.ESIGNET_USERINFO_URL;
-  
+
   try {
     if (!url) {
       return { error: 'URL not defined' };
@@ -290,7 +290,7 @@ export const fetchUserData = async (token: string): Promise<any> => {
     }
 
     const data = await response.text(); // Parse the response as text (assuming it's a token)
-   
+
     return data; // Return the token
   } catch (error) {
     console.error('Error:', error);
@@ -314,7 +314,7 @@ if ( !REACT_APP_KYC_PROPERTIES_TO_COMPARE) {
   console.error('One required environment variable are not defined');
   process.exit(1);
 }
-  
+
   const kycPropertiesToCompare = REACT_APP_KYC_PROPERTIES_TO_COMPARE.split(',') as Array<
   keyof KYCInformation | keyof KYCData>;
 if (!kycPropertiesToCompare.length) {
@@ -328,7 +328,7 @@ if (!kycPropertiesToCompare.length) {
     if (kycInfoValue !== kycDataValue) {
       match = false;
       console.log(`${prop} does not match`);
-    }  
+    }
   }
 
   if (match) {
@@ -350,20 +350,20 @@ export const GetParties = async (selectedPaymentType: string, payeeId: string) :
     const apiUrl = `${MOJALOOP_GETPARTIES_URL}/parties/${selectedPaymentType}/${payeeId}`;
 
     const response = await fetch(apiUrl);
-    if (!response.ok)       
+    if (!response.ok)
       return { error: `Failed to fetch data due to ${response.status} ${response.statusText}` };
 
     const { kycInformation } = await response.json();
     const kycData = JSON.parse(kycInformation).data;
-   
-   
+
+
     return { kycData };
 
   }catch  (error){
     console.error('Error:', error);
     return { error: 'Failed to fetch from payment adapter' };
   }
-  
+
 }
 
 
