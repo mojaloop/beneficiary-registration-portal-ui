@@ -95,7 +95,30 @@ Start the server:
 npm run start
 ```
 
+#### Running the project using docker-compose
+
+Navigate to the root directory:
+
+```bash
+cd beneficiary-registration-portal/
+```
+
+Start the projects in docker by running this command:
+
+```bash
+docker-compose build
+
+docker-compose up
+```
+
+To tear it down, run:
+
+```bash
+docker-compose down
+
+```
+
 ## Usage
 
-- Frontend: Access the portal by navigating to http://localhost:3000 in your web browser.
+- Frontend: Access the portal by navigating to http://localhost:3007 in your web browser.
 - Backend: The server is running on http://localhost:8080.

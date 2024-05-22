@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      - HOST=mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - my_network
+
+  mysql:
+    image: mysql/mysql-server
+    ports:
+      - "3306:3306"
+    volumes:
+      # Note: this fixes the permissions issue, but docker-compose up will fail on first attempt
+      - ./docker/sql-init/:/docker-entrypoint-initdb.d/
+    environment:
+      - MYSQL_USER=${USER:-user}
+      - MYSQL_PASSWORD=${PASSWORD:-pass123}
+      - MYSQL_DATABASE=${DATABASE:-brp}
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    networks:
+      - my_network
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "mysql" ]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      interval: 10s
+
+networks:
+  my_network:
+    driver: bridge
