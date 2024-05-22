@@ -3,10 +3,11 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    env_file: .env
     environment:
       - HOST=mysql
     depends_on:
