@@ -1,4 +1,4 @@
-import mysql from 'mysql';
+import mysql, {createPoolCluster} from 'mysql';
 import { TokenData } from '../models/TokenData';
 
 const {
@@ -7,6 +7,13 @@ const {
   PASSWORD,
   DATABASE,
 } = process.env;
+
+console.log(HOST,
+  USER,
+  PASSWORD,
+  DATABASE
+);
+
 
 const db = mysql.createConnection({
   host: HOST,
@@ -56,11 +63,11 @@ export const SaveDataToDB = async (tokenData: TokenData): Promise<TokenData | { 
           if (err) {
             console.error('Error saving data to database:', err);
             reject({ error: 'Failed to save data' });
-            return ({ error: 'Failed to save data' }); 
+            return ({ error: 'Failed to save data' });
           } else {
             console.log('Data saved to database successfully');
             resolve(tokenData);
-            return ({ message: 'Data saved successfully' }); 
+            return ({ message: 'Data saved successfully' });
           }
         });
       }
