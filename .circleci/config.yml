@@ -276,14 +276,9 @@ jobs:
       - restore_cache:
           name: Restore npm Package Cache
           key: dependency-cache-{{ .Environment.CIRCLE_SHA1 }}
-#      - run:
-#          name: Execute code coverage check
-#          command: npm -s run test:coverage-check
-#      - store_artifacts:
-#          path: coverage
-#          destination: test
-#      - store_test_results:
-#          path: coverage
+      - run:
+          name: Execute code coverage check
+          command: echo "Need to add unit tests"
 
   build-local:
     executor: default-machine
