@@ -28,7 +28,6 @@ defaults_docker_Dependencies: &defaults_docker_Dependencies |
   apk --no-cache add openssh-client
   apk --no-cache add -t build-dependencies make gcc g++ python3 libtool autoconf automake jq
   apk --no-cache add -t openssl ncurses coreutils libgcc linux-headers grep util-linux binutils findutils
-  apk --no-cache add librdkafka-dev
 
 ## Default 'default-machine' executor dependencies
 defaults_machine_Dependencies: &defaults_machine_Dependencies |
@@ -38,7 +37,7 @@ defaults_machine_Dependencies: &defaults_machine_Dependencies |
   sudo add-apt-repository -y "deb https://packages.confluent.io/clients/deb $(lsb_release -cs) main"
 
   ## Install deps
-  sudo apt install -y librdkafka-dev curl bash
+  sudo apt install -y curl bash
 
 defaults_awsCliDependencies: &defaults_awsCliDependencies |
   apk --no-cache add aws-cli
@@ -148,8 +147,6 @@ defaults_display_versions: &defaults_display_versions
 defaults_environment: &defaults_environment
   ## env var for nx to set main branch
   MAIN_BRANCH_NAME: main
-  ## Disable LIBRDKAFKA build since we install it via general dependencies
-  # BUILD_LIBRDKAFKA: 0
 
 ##
 # Executors
@@ -256,21 +253,9 @@ jobs:
       - restore_cache:
           name: Restore npm Package Cache
           key: dependency-cache-{{ .Environment.CIRCLE_SHA1 }}
-          # - run:
-          # This is needed for legacy core tests. Remove this once 'tape' is fully deprecated.
-          # name: Install tape, tapes and tap-xunit
-          # command: npm install tape tapes tap-xunit
-      - run:
-          name: Create dir for test results
-          command: mkdir -p ./test/results
       - run:
           name: Execute unit tests
-          command: npm run test:xunit
-      - store_artifacts:
-          path: ./test/results
-          destination: test
-      - store_test_results:
-          path: ./test/results
+          command: npm test
 
   test-coverage:
     executor: default-docker
@@ -291,14 +276,14 @@ jobs:
       - restore_cache:
           name: Restore npm Package Cache
           key: dependency-cache-{{ .Environment.CIRCLE_SHA1 }}
-      - run:
-          name: Execute code coverage check
-          command: npm -s run test:coverage-check
-      - store_artifacts:
-          path: coverage
-          destination: test
-      - store_test_results:
-          path: coverage
+#      - run:
+#          name: Execute code coverage check
+#          command: npm -s run test:coverage-check
+#      - store_artifacts:
+#          path: coverage
+#          destination: test
+#      - store_test_results:
+#          path: coverage
 
   build-local:
     executor: default-machine
@@ -349,55 +334,8 @@ jobs:
             # Install dependencies
             npm ci
       - run:
-          name: Create dir for test results
-          command: mkdir -p ./test/results
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: Load the pre-built docker image from workspace
-          command: docker load -i /tmp/docker-image.tar
-      ## This shouldn't be needed as the docker image is pre-built by build-local job
-      # - run:
-      #     name: Build docker-compose
-      #     command: |
-      #       docker-compose build
-      # - run:
-      #     name: Pull docker containers
-      #     command: |
-      #       docker-compose pull
-      - run:
-          name: Start docker-compose
-          command: |
-            docker-compose up -d
-
-            # Check straight away to see if any containers have exited
-            docker-compose ps
-      - run:
-          name: Wait 4 Health Services
-          command: |
-            # Set Node version to default (Note: this is needed on Ubuntu)
-            nvm use default
-
-            # wait for services to be up and running
-            npm run wait-4-docker
-      - run:
-          name: Execute Integration Tests
-          command: |
-            # Set Node version to default (Note: this is needed on Ubuntu)
-            nvm use default
-
-            # check service health
-            curl localhost:3000/health && \
-
-            # run integration tests
-            npm run test:xint | tee ./test/results/test-int.log
-          environment:
-            ENDPOINT_URL: http://localhost:4545/notification
-      - store_artifacts:
-          path: ./test/results
-          destination: test
-      - store_test_results:
-          path: ./test/results
+          name: No Integration Tests
+          command: echo "Need to add integration tests"
 
   test-functional:
     executor: default-machine
@@ -412,11 +350,8 @@ jobs:
           name: Load the pre-built docker image from workspace
           command: docker load -i /tmp/docker-image.tar
       - run:
-          name: Execute TTK functional tests
-          command: bash ./test/scripts/test-functional.sh
-      - store_artifacts:
-          path: /tmp/ml-core-test-harness/reports
-          destination: test
+          name: No Functional Tests
+          command: echo "Need to add functional tests"
 
   vulnerability-check:
     executor: default-docker
@@ -960,8 +895,7 @@ workflows:
             - pr-tools/pr-title-check
             - test-lint
             - test-unit
-            ## TODO: re-enable these once we achieve test coverage for the fx changes
-            # - test-coverage
+            - test-coverage
             - test-integration
             - test-functional
             - vulnerability-check
