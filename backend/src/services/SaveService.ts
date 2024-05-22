@@ -8,13 +8,6 @@ const {
   DATABASE,
 } = process.env;
 
-console.log(HOST,
-  USER,
-  PASSWORD,
-  DATABASE
-);
-
-
 const db = mysql.createConnection({
   host: HOST,
   user: USER,
