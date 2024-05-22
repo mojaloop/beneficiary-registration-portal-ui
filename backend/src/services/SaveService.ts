@@ -1,4 +1,4 @@
-import mysql, {createPoolCluster} from 'mysql';
+import mysql, {createPoolCluster} from 'mysql2';
 import { TokenData } from '../models/TokenData';
 
 const {
@@ -36,7 +36,7 @@ export const SaveDataToDB = async (tokenData: TokenData): Promise<TokenData | { 
         return;
       }
 
-      if (results.length > 0) {
+      if (Array.isArray(results) && results.length > 0) {
         // If psut exists, update the existing record with the new token and set status to 'active'
         const updateQuery = 'UPDATE tokens SET token = ?, status = "active" WHERE psut = ?';
         db.query(updateQuery, [token, psut], (err, result) => {
