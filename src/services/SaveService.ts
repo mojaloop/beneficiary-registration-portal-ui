@@ -7,6 +7,7 @@ const {
   PASSWORD,
   DATABASE,
 } = process.env;
+// todo: use a package (e.g. convict) to deal with env vars; make some envs required
 
 const db = mysql.createConnection({
   host: HOST,
@@ -15,6 +16,7 @@ const db = mysql.createConnection({
   database: DATABASE
 });
 
+// todo: connect to DB in index.ts before starting the server
 db.connect((err) => {
   if (err) {
     console.error('Error connecting to database:', err);
@@ -29,6 +31,7 @@ export const SaveDataToDB = async (tokenData: TokenData): Promise<TokenData | { 
 
     // First, check if the psut already exists in the token table
     const checkQuery = 'SELECT * FROM tokens WHERE psut = ?';
+    // todo: use async/await version instead on callbacks, e.g.: const [result] = await db.query(checkQuery);
     db.query(checkQuery, [psut], (err, results) => {
       if (err) {
         console.error('Error checking psut in database:', err);
@@ -56,7 +59,7 @@ export const SaveDataToDB = async (tokenData: TokenData): Promise<TokenData | { 
           if (err) {
             console.error('Error saving data to database:', err);
             reject({ error: 'Failed to save data' });
-            return ({ error: 'Failed to save data' });
+            return ({ error: 'Failed to save data' }); // todo: what for this return?
           } else {
             console.log('Data saved to database successfully');
             resolve(tokenData);

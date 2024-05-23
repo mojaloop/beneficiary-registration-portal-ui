@@ -38,11 +38,13 @@ if (!CLIENT_ID || !ESIGNET_TOKEN_URL || !RETURN_URL || !PAYMENT_ADAPTER_URL || !
 // the payment adapter and the information is saved to the database.
 // The response will contain the user's name and the token data.
 router.post('/', async (req: Request, res: Response) => {
+  // todo: add API spec (input params and types), add validation
   try {
     // Get environment variables
     const { CLIENT_ID, ESIGNET_TOKEN_URL, RETURN_URL, MOJALOOP_GETPARTIES_URL } = process.env;
 
     // Ensure all required environment variables are defined
+    // todo: should be checked only once on server start
     if (!CLIENT_ID || !ESIGNET_TOKEN_URL || !RETURN_URL || !MOJALOOP_GETPARTIES_URL) {
       console.error('One or more required environment variables are not defined');
       return res.status(500).json({ error: 'Environment variables not defined' });
