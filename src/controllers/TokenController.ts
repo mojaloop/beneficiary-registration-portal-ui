@@ -285,7 +285,7 @@ export const fetchUserData = async (token: string): Promise<any> => {
 
     if (!response.ok) {
       const errorMessage = `Failed to fetch: ${response.status} ${response.statusText}`;
-      console.error("errorMessage", errorMessage);
+      console.error("errorMessage", errorMessage, url, response);
       return { error: errorMessage };
     }
 
