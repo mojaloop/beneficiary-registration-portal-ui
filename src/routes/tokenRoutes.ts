@@ -8,6 +8,7 @@ import { GetParties, compareKYCData, fetchUserData, getUserToken, registerAccoun
 import { SaveDataToDB } from '../services/SaveService';
 import dotenv from 'dotenv';
 import { KYCInformation } from '../models/KYCInformation';
+import { CURRENCY } from '../constants';
 import { KYCData } from '../models/KYCData';
 
 dotenv.config();
@@ -17,17 +18,14 @@ const {
   CLIENT_ID,
   ESIGNET_TOKEN_URL,
   RETURN_URL,
-  PAYMENT_ADAPTER_URL,
-  MOJALOOP_GETPARTIES_URL,
 } = process.env;
-
+// todo: move to config or constants
 
 // Ensure all required environment variables are defined
-if (!CLIENT_ID || !ESIGNET_TOKEN_URL || !RETURN_URL || !PAYMENT_ADAPTER_URL || !MOJALOOP_GETPARTIES_URL) {
+if (!CLIENT_ID || !ESIGNET_TOKEN_URL || !RETURN_URL) {
   console.error('One or more required environment variables are not defined');
   process.exit(1);
 }
-
 
 
 // Get user info endpoint
@@ -40,25 +38,17 @@ if (!CLIENT_ID || !ESIGNET_TOKEN_URL || !RETURN_URL || !PAYMENT_ADAPTER_URL || !
 router.post('/', async (req: Request, res: Response) => {
   // todo: add API spec (input params and types), add validation
   try {
-    // Get environment variables
-    const { CLIENT_ID, ESIGNET_TOKEN_URL, RETURN_URL, MOJALOOP_GETPARTIES_URL } = process.env;
-
-    // Ensure all required environment variables are defined
-    // todo: should be checked only once on server start
-    if (!CLIENT_ID || !ESIGNET_TOKEN_URL || !RETURN_URL || !MOJALOOP_GETPARTIES_URL) {
-      console.error('One or more required environment variables are not defined');
-      return res.status(500).json({ error: 'Environment variables not defined' });
-    }
-
     // Generate JWT token
     const jwtToken = await signJWTToken(CLIENT_ID, ESIGNET_TOKEN_URL);
     if (!jwtToken) {
+      console.error('no jwtToken');
       return res.status(500).json({ error: 'Error generating JWT token' });
     }
 
     // Get ESigNet token
     const esignetToken = await getUserToken(req.body.code, CLIENT_ID, jwtToken, RETURN_URL);
     if (esignetToken.error) {
+      console.error('esignetToken error:', esignetToken);
       return res.status(500).json({ error: 'Error getting ESigNet token' });
     }
 
@@ -67,15 +57,18 @@ router.post('/', async (req: Request, res: Response) => {
     if (userToken.error) {
       return res.status(500).json({ error: 'Error fetching user data' });
     }
+    console.log('userToken is got');
 
     // Decode user token
     const userTokenData = await decodeToken(userToken);
     if (!userTokenData) {
+      console.error('no userTokenData:', userTokenData);
       return res.status(500).json({ error: 'Error decoding user token' });
     }
 
     // Create user data object
     const userData = new KYCInformation(userTokenData);
+    console.log('userData:', { ...userData, picture: null  });
 
     // Get party information from MojaLoo SDK
     const getPatiesData = await GetParties(req.body.selectedPaymentType, req.body.payeeId);
@@ -84,13 +77,13 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // Create party data object
-    const kycData = new KYCData(getPatiesData.kycData);
-
-    // Compare user and party information
-    const isMatch = await compareKYCData(userData, kycData);
-    if (!isMatch) {
-      return res.status(400).json({ error: 'KYC information does not match' });
-    }
+    // const kycData = new KYCData(getPatiesData.kycData);
+    //
+    // // Compare user and party information
+    // const isMatch = await compareKYCData(userData, kycData);
+    // if (!isMatch) {
+    //   return res.status(400).json({ error: 'KYC information does not match' });
+    // }
 
     // Register token and account with the payment adapter
     const token = await registerToken(req.body.selectedPaymentType, req.body.payeeId, userData.sub);
@@ -98,14 +91,18 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(500).json({ error: 'Error registering token' });
     }
 
-    const account = await registerAccount(req.body.selectedPaymentType, req.body.payeeId);
+    const account = await registerAccount(token, CURRENCY);
+    // todo: get CURRENCY from party response?
     if (!account) {
       return res.status(500).json({ error: 'Error registering account' });
     }
+    console.log('account:', account);
 
     // Save token data to the database
     const tokenData = { psut: userData.sub, token };
     const success = await SaveDataToDB(tokenData);
+    console.log('success and tokenData:', { success, tokenData });
+
     if (success) {
       return res.json({ name: userData.name, tokenData });
     } else {

@@ -1,9 +1,17 @@
-import { json } from 'stream/consumers';
-import { error } from 'console';
+// import { json } from 'stream/consumers';
+// import { error } from 'console';
 import { KYCInformation } from '../models/KYCInformation';
 import { KYCData } from '../models/KYCData';
+import {
+  ID_TYPE_ALIAS,
+  PTA_URL,
+  MOJALOOP_GETPARTIES_URL,
+  MOJALOOP_SDK_URL,
+  ESIGNET_TOKEN_URL,
+  ESIGNET_USERINFO_URL,
+} from '../constants';
 
-const mojaloopUrl = "http://192.168.1.55" // todo: remove this hardcoded value
+// const mojaloopUrl = "http://192.168.1.55" // todo: remove this hardcoded value
 //get user info from esignet
 
 /**
@@ -15,49 +23,50 @@ const mojaloopUrl = "http://192.168.1.55" // todo: remove this hardcoded value
  * @param {string} redirect_uri The redirect URI of the app
  * @returns {Promise<string | null>} The JSON response from eSignet or null in case of error
  */
-export const GetUserInfo = async (
-  code: string,
-  clientId: string,
-  grant_type: string,
-  redirect_uri: string
-): Promise<string | null> => {
-
-  const apiUrl = `${mojaloopUrl}:3000/tokens`; // eSignet API endpoint
-  const requestBody = {
-    clientId: clientId,
-    code: code,
-    grant_type: grant_type,
-    redirect_uri: redirect_uri
-  }; // Request body to be sent to eSignet
-
-  try {
-    //await axios.post(apiUrl, requestBody); // Uncomment this if using axios
-
-    const response = await fetch(apiUrl, { // Send POST request to eSignet API
-        method: 'POST',
-        mode: 'no-cors', // Disable CORS to avoid any issues
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-    //alert('The token has been registered'); // Uncomment this if needed
-    const result = await response.json(); // Parse the response as JSON
-    return result;
-
-  } catch (error) {
-    console.error('Error registering token:', error); // Log error
-    return null;
-  }
-};
+// export const GetUserInfo = async (
+//   code: string,
+//   clientId: string,
+//   grant_type: string,
+//   redirect_uri: string
+// ): Promise<string | null> => {
+//   // todo: check if we need this fn
+//
+//   const apiUrl = `${mojaloopUrl}:3000/tokens`; // eSignet API endpoint
+//   const requestBody = {
+//     clientId: clientId,
+//     code: code,
+//     grant_type: grant_type,
+//     redirect_uri: redirect_uri
+//   }; // Request body to be sent to eSignet
+//
+//   try {
+//     //await axios.post(apiUrl, requestBody); // Uncomment this if using axios
+//
+//     const response = await fetch(apiUrl, { // Send POST request to eSignet API
+//         method: 'POST',
+//         mode: 'no-cors', // Disable CORS to avoid any issues
+//         headers: {
+//           'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(requestBody)
+//       });
+//     //alert('The token has been registered'); // Uncomment this if needed
+//     const result = await response.json(); // Parse the response as JSON
+//     return result;
+//
+//   } catch (error) {
+//     console.error('Error registering token:', error); // Log error
+//     return null;
+//   }
+// };
 
 
 /**
- * Register a new account with the MojaLoop account service.
+ * Register a token mapping in PTA.
  *
  * @param {string} idType - The type of the account holder's ID
  * @param {string} payeeId - The account holder's ID
- * @param {string} idToken - The ID token obtained from eSignet
+ * @param {string} psut - The ID token obtained from eSignet (sub-field)
  * @returns {Promise<string | null>} The modelId of the newly registered account, or null if registration failed
  */
 export const registerToken = async (
@@ -68,17 +77,12 @@ export const registerToken = async (
 
   const token = await generateRandomToken(psut);
 
-  const tokenAdapterUrl = process.env.PAYMENT_ADAPTER_URL;
-
-  if(!tokenAdapterUrl){
-throw error('PAYMENT_ADAPTER_URL not defined');
-  }
-  const apiUrl = `${tokenAdapterUrl}/tokens`; // MojaLoop API endpoint
+  const apiUrl = `${PTA_URL}/tokens`;
   const requestBody = {
     payeeId: payeeId,
     payeeIdType: idType,
     paymentToken: token
-  }; // Request body to be sent to MojaLoop
+  };
 
   try {
     //await axios.post(apiUrl, requestBody); // Uncomment this if using axios
@@ -91,10 +95,9 @@ throw error('PAYMENT_ADAPTER_URL not defined');
         },
         body: JSON.stringify(requestBody)
       });
-    //alert('The token has been registered'); // Uncomment this if needed
+    console.log('token is registered', { token, apiUrl, requestBody, response });
 
     return token;
-
   } catch (error) {
     console.error('Error registering token:', error); // Log error
     return null;
@@ -105,35 +108,17 @@ throw error('PAYMENT_ADAPTER_URL not defined');
 /**
  * Register a new account with the MojaLoop account service.
  *
- * @param {string} idType - The type of the account holder's ID
- * @param {string} payeeId - The account holder's ID
+ * @param {string} token - Alias token
+ * @param {string} currency - Account currency
  * @returns {string | null} The modelId of the newly registered account, or null if registration failed
  */
-export const registerAccount = async (idType: string, payeeId: string): Promise<string | null> => {
-
-  const tokenAdapterUrl = process.env.MOJALOOP_SDK_URL;
-
-  if(!tokenAdapterUrl){
-throw error('MOJALOOP_GETPARTIES_URL not defined');
-  }
-  const apiUrl = `${tokenAdapterUrl}accounts`;
+export const registerAccount = async (token: string, currency: string): Promise<string | null> => {
+  const apiUrl = `${MOJALOOP_SDK_URL}/accounts`;
   const requestBody = [
     {
-      /**
-       * Type of the account holder's ID.
-       * Currently only "ALIAS" is supported.
-       */
-      idType: "ALIAS",
-      /**
-       * The account holder's ID.
-       * This will be used as the alias for the account.
-       */
-      idValue: payeeId,
-      /**
-       * The currency code of the account.
-       * Currently only "ZMW" is supported.
-       */
-      currency: "ZMW"
+      idType: ID_TYPE_ALIAS,
+      idValue: token,
+      currency,
     }
   ];
 
@@ -146,10 +131,10 @@ throw error('MOJALOOP_GETPARTIES_URL not defined');
       },
       body: JSON.stringify(requestBody)
     });
+    // todo: handle error response from ML due to known issue
 
-    // No need for .json() here as it's a non-CORS request
     const responseData = await response.json();
-
+    console.log('alias account is registered', { apiUrl, requestBody, responseData });
 
     // Assuming the response contains the modelId
     const modelId: string = responseData.modelId;
@@ -213,16 +198,9 @@ export const getUserToken = async (
   client_assertion: string,
   redirect_uri: string
 ): Promise<any> => {
-  // The URL to fetch the user token from
-  const url = process.env.ESIGNET_TOKEN_URL as string;
-
-  if (!url) {
-    throw new Error('JWT private key is not defined in the environment variables');
-  }
+  console.log('getUserToken args:', { code, client_id, client_assertion, redirect_uri, ESIGNET_TOKEN_URL });
 
   try {
-
-
     const headers = {
       'Content-Type': 'application/x-www-form-urlencoded'
     };
@@ -231,12 +209,12 @@ export const getUserToken = async (
       'grant_type': 'authorization_code',
       'code': code, // Replace with your actual code
       'client_id': client_id, // Replace with your actual client_id
-      'client_assertion_type': 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer', // Replace with your actual client_assertion_type
+      'client_assertion_type': 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       'client_assertion': client_assertion, // Replace with your actual client_assertion
-      'redirect_uri': "http://localhost:3007" // todo: remove this hardcoded value
+      redirect_uri,
     });
 
-    const response = await fetch(url, {
+    const response = await fetch(ESIGNET_TOKEN_URL!, {
       method: 'POST',
       headers,
       body,
@@ -244,8 +222,7 @@ export const getUserToken = async (
 
     if (!response.ok) {
       const error = await response.json();
-
-
+      console.error('getUserToken response error:', error);
       return { error: `Failed to fetch user token: ${error.error_description || response.statusText}` };
     }
 
@@ -265,27 +242,21 @@ export const getUserToken = async (
  * @returns Parsed JSON object containing the user's data
  */
 export const fetchUserData = async (token: string): Promise<any> => {
-  // URL for fetching user data
-  const url = process.env.ESIGNET_USERINFO_URL;
 
   try {
-    if (!url) {
-      return { error: 'URL not defined' };
-    }
-
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}` // Use the provided access token
     };
 
-    const response = await fetch(url, {
+    const response = await fetch(ESIGNET_USERINFO_URL!, {
       method: 'GET',
       headers: headers
     });
 
     if (!response.ok) {
       const errorMessage = `Failed to fetch: ${response.status} ${response.statusText}`;
-      console.error("errorMessage", errorMessage, url, response);
+      console.error("errorMessage", errorMessage, ESIGNET_USERINFO_URL, response);
       return { error: errorMessage };
     }
 
@@ -309,11 +280,11 @@ export const compareKYCData = async (
     REACT_APP_KYC_PROPERTIES_TO_COMPARE
   } = process.env;
 
-// Ensure all required environment variables are defined
-if ( !REACT_APP_KYC_PROPERTIES_TO_COMPARE) {
-  console.error('One required environment variable are not defined');
-  process.exit(1);
-}
+  // todo: clarify if we need this
+  if (!REACT_APP_KYC_PROPERTIES_TO_COMPARE) {
+    console.error('One required environment variable are not defined');
+    throw new Error('No REACT_APP_KYC_PROPERTIES_TO_COMPARE env var');
+  }
 
   const kycPropertiesToCompare = REACT_APP_KYC_PROPERTIES_TO_COMPARE.split(',') as Array<
   keyof KYCInformation | keyof KYCData>;
@@ -340,30 +311,23 @@ if (!kycPropertiesToCompare.length) {
 
 export const GetParties = async (selectedPaymentType: string, payeeId: string) : Promise <any> => {
   try {
-    const {  MOJALOOP_GETPARTIES_URL } = process.env;
-
-    // Ensure all required environment variables are defined
-    if (!MOJALOOP_GETPARTIES_URL) {
-      return { error: 'Environment variables not defined' };
-    }
-
     const apiUrl = `${MOJALOOP_GETPARTIES_URL}/parties/${selectedPaymentType}/${payeeId}`;
 
     const response = await fetch(apiUrl);
-    if (!response.ok)
+    if (!response.ok) {
+      console.error('response is not ok:', response);
       return { error: `Failed to fetch data due to ${response.status} ${response.statusText}` };
+    }
 
-    const { kycInformation } = await response.json();
-    const kycData = JSON.parse(kycInformation).data;
+    const respData = await response.json();
+    console.log('getParties response:', { respData, apiUrl });
+    return respData;
+    // const kycData = JSON.parse(respData.kycInformation).data;
 
-
-    return { kycData };
-
-  }catch  (error){
-    console.error('Error:', error);
+    // return { kycData };
+  } catch (error) {
+    console.error(`error in GetParties: `, error);
     return { error: 'Failed to fetch from payment adapter' };
   }
 
 }
-
-
