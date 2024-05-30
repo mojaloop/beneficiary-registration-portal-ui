@@ -1,0 +1,176 @@
+{
+  "options": {},
+  "name": "sdk-p2p",
+  "test_cases": [
+    {
+      "id": 1,
+      "name": "P2P Transfer Happy Path",
+      "meta": {
+        "info": "P2P Transfer Happy Path"
+      },
+      "fileInfo": {
+        "path": "pm4ml/sdk_post_transfer.json"
+      },
+      "requests": [
+        {
+          "id": 2,
+          "description": "Send transfer",
+          "apiVersion": {
+            "minorVersion": 1,
+            "majorVersion": 2,
+            "type": "mojaloop_connector_outbound",
+            "asynchronous": true,
+            "prefix": "/sdk-out",
+            "hostnames": [],
+            "specFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/api_spec.yaml",
+            "callbackMapFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/callback_map.json",
+            "responseMapFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/response_map.json",
+            "jsfRefFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/mockRef.json",
+            "triggerTemplatesFolder": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/trigger_templates"
+          },
+          "operationPath": "/transfers",
+          "path": "/transfers",
+          "method": "post",
+          "body": {
+            "homeTransactionId": "1234",
+            "from": {
+              "type": "CONSUMER",
+              "idType": "MSISDN",
+              "idValue": "{$inputs.FX_SOURCE_PARTY_ID_1}",
+              "displayName": "string",
+              "firstName": "Henrik",
+              "middleName": "Johannes",
+              "lastName": "Karlsson",
+              "dateOfBirth": "1966-06-16",
+              "fspId": "pm4mltest1"
+            },
+            "to": {
+              "type": "CONSUMER",
+              "idType": "MSISDN",
+              "idValue": "{$inputs.FX_DESTINATION_PARTY_ID_1}",
+              "merchantClassificationCode": 123
+            },
+            "amountType": "SEND",
+            "currency": "{$inputs.FX_TARGET_CURRENCY}",
+            "amount": "10",
+            "transactionType": "TRANSFER",
+            "note": "Note sent to Payee.",
+            "skipPartyLookup": false
+          },
+          "params": {
+            "Type": "",
+            "ID": ""
+          },
+          "tests": {
+            "assertions": [
+              {
+                "id": 1,
+                "description": "Status is 200",
+                "exec": [
+                  "expect(response.status).to.equal(200)"
+                ]
+              },
+              {
+                "id": 2,
+                "description": "Current state should be WAITING_FOR_PARTY_ACCEPTANCE",
+                "exec": [
+                  "expect(response.body.currentState).to.equal('WAITING_FOR_PARTY_ACCEPTANCE')"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": 3,
+          "description": "Accept Party",
+          "apiVersion": {
+            "minorVersion": 1,
+            "majorVersion": 2,
+            "type": "mojaloop_connector_outbound",
+            "asynchronous": false,
+            "prefix": "/sdk-out",
+            "hostnames": [],
+            "specFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/api_spec.yaml",
+            "callbackMapFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/callback_map.json",
+            "responseMapFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/response_map.json",
+            "jsfRefFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/mockRef.json",
+            "triggerTemplatesFolder": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/trigger_templates"
+          },
+          "operationPath": "/transfers/{transferId}",
+          "path": "/transfers/{$prev.2.response.body.transferId}",
+          "method": "put",
+          "params": {
+            "transferId": "{$prev.2.response.body.transferId}"
+          },
+          "body": {
+            "acceptParty": true
+          },
+          "disabled": false,
+          "tests": {
+            "assertions": [
+              {
+                "id": 1,
+                "description": "Status is 200",
+                "exec": [
+                  "expect(response.status).to.equal(200)"
+                ]
+              },
+              {
+                "id": 2,
+                "description": "Current state should be WAITING_FOR_QUOTE_ACCEPTANCE",
+                "exec": [
+                  "expect(response.body.currentState).to.equal('WAITING_FOR_QUOTE_ACCEPTANCE')"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": 5,
+          "description": "Accept Quote",
+          "apiVersion": {
+            "minorVersion": 1,
+            "majorVersion": 2,
+            "type": "mojaloop_connector_outbound",
+            "asynchronous": false,
+            "prefix": "/sdk-out",
+            "hostnames": [],
+            "specFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/api_spec.yaml",
+            "callbackMapFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/callback_map.json",
+            "responseMapFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/response_map.json",
+            "jsfRefFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/mockRef.json",
+            "triggerTemplatesFolder": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/trigger_templates"
+          },
+          "operationPath": "/transfers/{transferId}",
+          "path": "/transfers/{$prev.2.response.body.transferId}",
+          "method": "put",
+          "params": {
+            "transferId": "{$prev.2.response.body.transferId}"
+          },
+          "body": {
+            "acceptQuote": true
+          },
+          "disabled": false,
+          "tests": {
+            "assertions": [
+              {
+                "id": 1,
+                "description": "Status is 200",
+                "exec": [
+                  "expect(response.status).to.equal(200)"
+                ]
+              },
+              {
+                "id": 2,
+                "description": "Current state should be COMPLETED",
+                "exec": [
+                  "expect(response.body.currentState).to.equal('COMPLETED')"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
