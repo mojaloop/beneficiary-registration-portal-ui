@@ -131,16 +131,17 @@ export const registerAccount = async (token: string, currency: string): Promise<
       },
       body: JSON.stringify(requestBody)
     });
-    // todo: handle error response from ML due to known issue
+    // error response from ML due to known issue with POST /account (fixed in the next release)
 
     const responseData = await response.json();
     console.log('alias account is registered', { apiUrl, requestBody, responseData });
+    return responseData;
 
-    // Assuming the response contains the modelId
-    const modelId: string = responseData.modelId;
-
-    // Return the generated token
-    return modelId;
+    // // Assuming the response contains the modelId
+    // const modelId: string = responseData.modelId;
+    //
+    // // Return the generated token
+    // return modelId;
 
     /**
      * If the response is successful, return a success message or relevant data.
