@@ -1,6 +1,6 @@
 {
   "options": {},
-  "name": "sdk-p2p",
+  "name": "g2p-p2p-transfer",
   "test_cases": [
     {
       "id": 1,
@@ -9,19 +9,19 @@
         "info": "P2P Transfer Happy Path"
       },
       "fileInfo": {
-        "path": "pm4ml/sdk_post_transfer.json"
+        "path": "g2p-p2p-transfer.json"
       },
       "requests": [
         {
-          "id": 2,
-          "description": "Send transfer",
+          "id": 6,
+          "description": "POST /transfer",
           "apiVersion": {
             "minorVersion": 1,
             "majorVersion": 2,
             "type": "mojaloop_connector_outbound",
-            "asynchronous": true,
+            "asynchronous": false,
             "prefix": "/sdk-out",
-            "hostnames": [],
+            "additionalApi": true,
             "specFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/api_spec.yaml",
             "callbackMapFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/callback_map.json",
             "responseMapFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/response_map.json",
@@ -36,30 +36,22 @@
             "from": {
               "type": "CONSUMER",
               "idType": "MSISDN",
-              "idValue": "{$inputs.FX_SOURCE_PARTY_ID_1}",
-              "displayName": "string",
-              "firstName": "Henrik",
-              "middleName": "Johannes",
-              "lastName": "Karlsson",
-              "dateOfBirth": "1966-06-16",
-              "fspId": "pm4mltest1"
+              "idValue": "{$inputs.G2P_PAYER_PARTY_ID}",
+              "displayName": "g2p bank",
+              "fspId": "{$inputs.G2P_PAYER_ID}"
             },
             "to": {
               "type": "CONSUMER",
-              "idType": "MSISDN",
-              "idValue": "{$inputs.FX_DESTINATION_PARTY_ID_1}",
+              "idType": "ALIAS",
+              "idValue": "{$inputs.G2P_PAYMENT_TOKEN}",
               "merchantClassificationCode": 123
             },
             "amountType": "SEND",
-            "currency": "{$inputs.FX_TARGET_CURRENCY}",
+            "currency": "{$inputs.G2P_CURRENCY}",
             "amount": "10",
             "transactionType": "TRANSFER",
-            "note": "Note sent to Payee.",
+            "note": "g2p demo",
             "skipPartyLookup": false
-          },
-          "params": {
-            "Type": "",
-            "ID": ""
           },
           "tests": {
             "assertions": [
@@ -81,7 +73,7 @@
           }
         },
         {
-          "id": 3,
+          "id": 7,
           "description": "Accept Party",
           "apiVersion": {
             "minorVersion": 1,
@@ -89,7 +81,7 @@
             "type": "mojaloop_connector_outbound",
             "asynchronous": false,
             "prefix": "/sdk-out",
-            "hostnames": [],
+            "additionalApi": true,
             "specFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/api_spec.yaml",
             "callbackMapFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/callback_map.json",
             "responseMapFile": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/response_map.json",
@@ -97,15 +89,15 @@
             "triggerTemplatesFolder": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/trigger_templates"
           },
           "operationPath": "/transfers/{transferId}",
-          "path": "/transfers/{$prev.2.response.body.transferId}",
+          "path": "/transfers/{$prev.6.response.body.transferId}",
           "method": "put",
           "params": {
-            "transferId": "{$prev.2.response.body.transferId}"
+            "transferId": "{$prev.6.response.body.transferId}"
           },
+          "queryParams": {},
           "body": {
             "acceptParty": true
           },
-          "disabled": false,
           "tests": {
             "assertions": [
               {
@@ -142,10 +134,10 @@
             "triggerTemplatesFolder": "spec_files/api_definitions/mojaloop_connector_outbound_2.1/trigger_templates"
           },
           "operationPath": "/transfers/{transferId}",
-          "path": "/transfers/{$prev.2.response.body.transferId}",
+          "path": "/transfers/{$prev.6.response.body.transferId}",
           "method": "put",
           "params": {
-            "transferId": "{$prev.2.response.body.transferId}"
+            "transferId": "{$prev.6.response.body.transferId}"
           },
           "body": {
             "acceptQuote": true
