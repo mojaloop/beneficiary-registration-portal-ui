@@ -76,6 +76,14 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(500).json({ error: 'Error fetching user data from SDK' });
     }
 
+    // todo: move to a separate method
+    const mlUserName = getPatiesData.party?.body?.name ?? '';
+    if (!mlUserName || mlUserName !== userData.name) {
+      const errMessage = 'User details from Mojaloop and MOSIP do not match!';
+      console.error(errMessage, { mlUserName });
+      return res.status(403).json({ error: errMessage });
+    }
+
     // Create party data object
     // const kycData = new KYCData(getPatiesData.kycData);
     //
@@ -96,7 +104,6 @@ router.post('/', async (req: Request, res: Response) => {
     if (!account) {
       return res.status(500).json({ error: 'Error registering account' });
     }
-    console.log('account:', account);
 
     // Save token data to the database
     const tokenData = { psut: userData.sub, token };
