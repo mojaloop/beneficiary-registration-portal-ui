@@ -1,7 +1,3 @@
-// import { json } from 'stream/consumers';
-// import { error } from 'console';
-import { KYCInformation } from '../models/KYCInformation';
-import { KYCData } from '../models/KYCData';
 import {
   ID_TYPE_ALIAS,
   PTA_URL,
@@ -10,55 +6,7 @@ import {
   ESIGNET_TOKEN_URL,
   ESIGNET_USERINFO_URL,
 } from '../constants';
-
-// const mojaloopUrl = "http://192.168.1.55" // todo: remove this hardcoded value
-//get user info from esignet
-
-/**
- * Fetches user information from eSignet
- *
- * @param {string} code The code obtained from eSignet
- * @param {string} clientId The client ID of the app
- * @param {string} grant_type The grant type to be used
- * @param {string} redirect_uri The redirect URI of the app
- * @returns {Promise<string | null>} The JSON response from eSignet or null in case of error
- */
-// export const GetUserInfo = async (
-//   code: string,
-//   clientId: string,
-//   grant_type: string,
-//   redirect_uri: string
-// ): Promise<string | null> => {
-//   // todo: check if we need this fn
-//
-//   const apiUrl = `${mojaloopUrl}:3000/tokens`; // eSignet API endpoint
-//   const requestBody = {
-//     clientId: clientId,
-//     code: code,
-//     grant_type: grant_type,
-//     redirect_uri: redirect_uri
-//   }; // Request body to be sent to eSignet
-//
-//   try {
-//     //await axios.post(apiUrl, requestBody); // Uncomment this if using axios
-//
-//     const response = await fetch(apiUrl, { // Send POST request to eSignet API
-//         method: 'POST',
-//         mode: 'no-cors', // Disable CORS to avoid any issues
-//         headers: {
-//           'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify(requestBody)
-//       });
-//     //alert('The token has been registered'); // Uncomment this if needed
-//     const result = await response.json(); // Parse the response as JSON
-//     return result;
-//
-//   } catch (error) {
-//     console.error('Error registering token:', error); // Log error
-//     return null;
-//   }
-// };
+import {ML_Party, TFetchUserDataRes, TGetUserTokenData} from "../types/types";
 
 
 /**
@@ -85,11 +33,10 @@ export const registerToken = async (
   };
 
   try {
-    //await axios.post(apiUrl, requestBody); // Uncomment this if using axios
 
-    const response = await fetch(apiUrl, { // Send POST request to MojaLoop API
+    const response = await fetch(apiUrl, {
         method: 'POST',
-        mode: 'no-cors', // Disable CORS to avoid any issues
+        mode: 'no-cors',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -131,17 +78,10 @@ export const registerAccount = async (token: string, currency: string): Promise<
       },
       body: JSON.stringify(requestBody)
     });
-    // error response from ML due to known issue with POST /account (fixed in the next release)
 
     const responseData = await response.json();
     console.log('alias account is registered', { apiUrl, requestBody, responseData });
     return responseData;
-
-    // // Assuming the response contains the modelId
-    // const modelId: string = responseData.modelId;
-    //
-    // // Return the generated token
-    // return modelId;
 
     /**
      * If the response is successful, return a success message or relevant data.
@@ -156,9 +96,6 @@ export const registerAccount = async (token: string, currency: string): Promise<
     return null;
   }
 };
-
-
-
 
 /**
  * Generate a random token based on the given ID token.
@@ -198,7 +135,7 @@ export const getUserToken = async (
   client_id: string,
   client_assertion: string,
   redirect_uri: string
-): Promise<any> => {
+): Promise<TGetUserTokenData> => {
   console.log('getUserToken args:', { code, client_id, client_assertion, redirect_uri, ESIGNET_TOKEN_URL });
 
   try {
@@ -229,7 +166,7 @@ export const getUserToken = async (
 
     const data = await response.json();
 
-    return data.access_token;
+    return {token:data.access_token};
   } catch (error) {
     console.error('Error fetching user token:', error);
     return { error: 'Error fetching user token' };
@@ -242,7 +179,7 @@ export const getUserToken = async (
  * @param token - Access token to be used for fetching user data
  * @returns Parsed JSON object containing the user's data
  */
-export const fetchUserData = async (token: string): Promise<any> => {
+export const fetchUserData = async (token: string): Promise<TFetchUserDataRes> => {
 
   try {
     const headers = {
@@ -263,54 +200,14 @@ export const fetchUserData = async (token: string): Promise<any> => {
 
     const data = await response.text(); // Parse the response as text (assuming it's a token)
 
-    return data; // Return the token
+    return {token:data}; // Return the token
   } catch (error) {
     console.error('Error:', error);
     return { error: 'Failed to fetch' };
   }
 }
 
-
-
-export const compareKYCData = async (
-  kycInfo: KYCInformation,
-  kycData: any) => {
-
-  let match = true;
-  const {
-    REACT_APP_KYC_PROPERTIES_TO_COMPARE
-  } = process.env;
-
-  // todo: clarify if we need this
-  if (!REACT_APP_KYC_PROPERTIES_TO_COMPARE) {
-    console.error('One required environment variable are not defined');
-    throw new Error('No REACT_APP_KYC_PROPERTIES_TO_COMPARE env var');
-  }
-
-  const kycPropertiesToCompare = REACT_APP_KYC_PROPERTIES_TO_COMPARE.split(',') as Array<
-  keyof KYCInformation | keyof KYCData>;
-if (!kycPropertiesToCompare.length) {
-  return { error: 'No KYC properties to compare' };
-}
-
-  for (const prop of kycPropertiesToCompare) {
-    const kycInfoValue = (kycInfo as any)[prop];
-    const kycDataValue = (kycData as any)[prop];
-
-    if (kycInfoValue !== kycDataValue) {
-      match = false;
-      console.log(`${prop} does not match`);
-    }
-  }
-
-  if (match) {
-      return true;
-  } else {
-       return false;
-  }
-};
-
-export const GetParties = async (selectedPaymentType: string, payeeId: string) : Promise <any> => {
+export const GetParties = async (selectedPaymentType: string, payeeId: string) : Promise <ML_Party> => {
   try {
     const apiUrl = `${MOJALOOP_GETPARTIES_URL}/parties/${selectedPaymentType}/${payeeId}`;
 
@@ -323,9 +220,6 @@ export const GetParties = async (selectedPaymentType: string, payeeId: string) :
     const respData = await response.json();
     console.log('getParties response:', { respData, apiUrl });
     return respData;
-    // const kycData = JSON.parse(respData.kycInformation).data;
-
-    // return { kycData };
   } catch (error) {
     console.error(`error in GetParties: `, error);
     return { error: 'Failed to fetch from payment adapter' };

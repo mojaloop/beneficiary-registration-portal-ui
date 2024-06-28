@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    env_file: .env
+    env_file: .env.example
     environment:
       - HOST=mysql
     restart: always
@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3007:3007"
-    env_file: .env
+    env_file: .env.example
     restart: always
     networks:
       - my_network
@@ -35,7 +35,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3006:3006"
-    env_file: .env
+    env_file: .env.example
     restart: always
     networks:
       - my_network
