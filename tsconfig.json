@@ -113,5 +113,5 @@
     "lib",
     "coverage"
   ],
-  "include": ["src/**/*","tests"]
+  "include": ["src/**/*"]
 }
