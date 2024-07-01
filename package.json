@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npm run test:unit",
     "test:unit": "jest --testMatch='**/unit/**/*.test.ts'",
-    "start": "cp .env.example .env && node ./dist/src/index.js",
+    "start": "node ./dist/src/index.js",
     "start:dev": "cp .env.example .env && ts-node src/index.ts",
     "clean": "npm run clean:npm; npm run clean:dist",
     "clean:dist": "rm -rf dist",
