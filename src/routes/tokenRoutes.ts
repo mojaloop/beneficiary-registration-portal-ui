@@ -84,12 +84,12 @@ export class RouteHandlers {
 
       // Get party information from Mojaloop SDK
       const getPatiesData = await GetParties(req.body.selectedPaymentType, req.body.payeeId);
-      if (getPatiesData.error) {
+      if ('error' in getPatiesData && getPatiesData.error) {
         return res.status(500).json({ error: 'Error fetching user data from SDK' });
       }
 
       // todo: move to a separate method
-      const mlUserName = getPatiesData.party?.body?.name ?? '';
+      const mlUserName = ('party' in getPatiesData ? getPatiesData.party?.body?.name : '');
       if (!mlUserName || mlUserName !== userData.name) {
         const errMessage = 'User details from Mojaloop and MOSIP do not match!';
         console.error(errMessage, { mlUserName });

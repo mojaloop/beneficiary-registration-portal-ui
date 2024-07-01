@@ -6,7 +6,7 @@ import {
   ESIGNET_TOKEN_URL,
   ESIGNET_USERINFO_URL,
 } from '../constants';
-import {ML_Party, TFetchUserDataRes, TGetUserTokenData} from "../types/types";
+import {MLParty, TFetchUserDataRes, TGetUserTokenData} from "../types/types";
 
 
 /**
@@ -207,7 +207,7 @@ export const fetchUserData = async (token: string): Promise<TFetchUserDataRes> =
   }
 }
 
-export const GetParties = async (selectedPaymentType: string, payeeId: string) : Promise <ML_Party> => {
+export const GetParties = async (selectedPaymentType: string, payeeId: string) : Promise <MLParty> => {
   try {
     const apiUrl = `${MOJALOOP_GETPARTIES_URL}/parties/${selectedPaymentType}/${payeeId}`;
 

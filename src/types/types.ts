@@ -10,39 +10,42 @@ export type TFetchUserDataRes = {
     error?: string;
 }
 
-export type ML_Party = {
-    "party"?: {
-        "body"?: {
-            "partyIdInfo"?: {
-                "partyIdType"?: string,
-                "partyIdentifier"?: string,
-                "partySubIdOrType"?: string,
-                "fspId"?: string,
-                "extensionList"?: {
-                    "extension"?: [
-                        {
-                            "key"?: string,
-                            "value"?: string
-                        }
-                    ]
+export type MLSuccessfulParty = {
+    party: {
+        body: {
+            partyIdInfo: {
+                partyIdType: string; // "MSISDN"
+                partyIdentifier: string; // "16135551212"
+                partySubIdOrType: string; // "string"
+                fspId: string; // "string"
+                extensionList: {
+                    extension: Array<{
+                        key: string; // "string"
+                        value: string; // "string"
+                    }>
                 }
-            },
-            "merchantClassificationCode"?: string,
-            "name"?: string,
-            "personalInfo"?: {
-                "complexName"?: {
-                    "firstName"?: string,
-                    "middleName"?: string,
-                    "lastName"?: string
-                },
-                "dateOfBirth"?: string
+            };
+            merchantClassificationCode: string; // "0"
+            name: string; // "string"
+            personalInfo: {
+                complexName: {
+                    firstName: string; // "Henrik"
+                    middleName: string; // "Johannes"
+                    lastName: string; // "Karlsson"
+                };
+                dateOfBirth: string; // "1966-06-16"
             }
-        },
-        "headers"?: unknown
-    },
-    "currentState"?: string
-    "error"?: string
+        };
+        headers: object; // {}
+    };
+    currentState: string; // "WAITING_FOR_ACTION"
 }
+
+export type MLPartyError = {
+    "error": string
+}
+
+export type MLParty = MLSuccessfulParty | MLPartyError
 
 export type TKYCData = {
     name: string;
